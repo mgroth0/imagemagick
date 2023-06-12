@@ -5,6 +5,8 @@ import matt.lang.optArray
 import matt.model.data.file.FilePath
 import matt.shell.ControlledShellProgram
 import matt.shell.Shell
+import matt.shell.ShellProgramPathContext.HomeBrew
+import matt.shell.ShellProgramPathContext.InPath
 
 val <R> Shell<R>.convert get() = ConvertCommand(this)
 
@@ -32,9 +34,15 @@ data class ImageMagickOptions(
     )
 }
 
-class ConvertCommand<R>(shell: Shell<R>) : ImageMagickCommand<R>(
+
+class ConvertCommand<R>(
+    shell: Shell<R>
+) : ImageMagickCommand<R>(
     shell = shell,
-    program = "/opt/homebrew/bin/convert",
+    program = when (shell.programPathContext) {
+        HomeBrew -> "/opt/homebrew/bin/convert"
+        InPath   -> "convert"
+    }
 ) {
     fun run(
         inputs: List<FilePath>,
@@ -55,9 +63,15 @@ class ConvertCommand<R>(shell: Shell<R>) : ImageMagickCommand<R>(
 @SeeURL("https://stackoverflow.com/questions/9992174/imagemagick-command-to-convert-and-save-with-same-name")
 val <R> Shell<R>.mogrify get() = MogrifyCommand(this)
 
-class MogrifyCommand<R>(shell: Shell<R>) : ImageMagickCommand<R>(
+class MogrifyCommand<R>(
+    shell: Shell<R>
+) : ImageMagickCommand<R>(
+
     shell = shell,
-    program = "/opt/homebrew/bin/mogrify",
+    program = when (shell.programPathContext) {
+        HomeBrew -> "/opt/homebrew/bin/mogrify"
+        InPath   -> "mogrify"
+    }
 ) {
     fun run(
         file: FilePath,
